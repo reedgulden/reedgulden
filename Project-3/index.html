@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reed Gulden - Visual Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poiret+One&family=Sue+Ellen+Francisco&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            background: rgb(49, 17, 2);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            width: 80px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.open {
+            width: 320px;
+        }
+
+        .menu-toggle {
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 2rem;
+            transition: color 0.3s;
+        }
+
+        .menu-toggle:hover {
+            color: #eebcd6;
+        }
+
+        .nav-menu {
+            margin-top: 8rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar.open .nav-menu {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .nav-link {
+            display: block;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            text-align: left;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #eebcd6;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Page Container */
+        .page-container {
+            margin-right: 80px;
+            transition: margin-right 0.5s;
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Home Page */
+        .home-page {
+            position: relative;
+            height: 100vh;
+            background-color: rgb(226, 186, 199);
+            overflow: hidden;
+        }
+
+        .home-page::after {
+            content: '';
+            position: absolute;
+            bottom: -15%;
+            right: 0;
+            width: 35%;
+            height: 100%;
+            background-image: url('twinz.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom right;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-orb {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            transition: all 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            background: #fcd34d00;
+            left: 0;
+            top: 0;
+        }
+
+        .orb-2 {
+            background: #06ffa400;
+            right: 0;
+            bottom: 0;
+            opacity: 0.2;
+        }
+
+        .home-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            padding: 2rem;
+            padding-left: 5%;
+        }
+
+        .name-container {
+            margin-left: 0;
+            margin-top: 0;
+            text-align: left;
+        }
+
+        .name-container h1 {
+            font-size: clamp(5rem, 18vw, 13rem);
+            font-weight: 900;
+            color: rgb(49, 17, 2);
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+        }
+
+        .name-container h1 span {
+            display: inline-block;
+            transition: transform 0.6s ease;
+            cursor: pointer;
+            animation: subtleSkew 3s ease-in-out infinite;
+        }
+
+        .name-container h1 span:nth-child(1) { animation-delay: 0s; }
+        .name-container h1 span:nth-child(2) { animation-delay: 0.3s; }
+        .name-container h1 span:nth-child(3) { animation-delay: 0.6s; }
+        .name-container h1 span:nth-child(4) { animation-delay: 0.9s; }
+        .name-container h1:nth-child(2) span:nth-child(1) { animation-delay: 1.2s; }
+        .name-container h1:nth-child(2) span:nth-child(2) { animation-delay: 1.5s; }
+        .name-container h1:nth-child(2) span:nth-child(3) { animation-delay: 1.8s; }
+        .name-container h1:nth-child(2) span:nth-child(4) { animation-delay: 2.1s; }
+        .name-container h1:nth-child(2) span:nth-child(5) { animation-delay: 2.4s; }
+        .name-container h1:nth-child(2) span:nth-child(6) { animation-delay: 2.7s; }
+
+        @keyframes subtleSkew {
+            0%, 100% {
+                transform: skewY(0deg);
+            }
+            50% {
+                transform: skewY(-3deg);
+            }
+        }
+
+        .name-container h1 span:hover {
+            transform: skewY(-5deg) scale(1.08);
+            animation: none;
+        }
+
+        /* Modal/Lightbox */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            max-width: 95%;
+            max-height: 95vh;
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            animation: scaleIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-image {
+            width: 75%;
+            height: 85vh;
+            background: #f2c2d6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: rgb(49, 17, 2);
+            padding: 2rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .modal-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0;
+        }
+
+        .beer-series {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .beer-series img {
+            flex: 1;
+            max-width: 23%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 0;
+        }
+
+        .brothers-series {
+            display: flex;
+            gap: 2rem;
+            width: 95%;
+            height: 90%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brothers-series img {
+            max-width: 48%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 0;
+        }
+
+        .modal-info {
+            width: 20%;
+            color: white;
+            padding-top: 2rem;
+        }
+
+        .modal-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #f2c2d6;
+        }
+
+        .modal-info p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            z-index: 3;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+        }
+
+        /* About Page */
+        .about-page {
+            background: rgb(226, 186, 199);
+            padding: 5rem 2rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-page::after {
+            content: '';
+            position: absolute;
+            top: 15%;
+            right: 2%;
+            width: 60%;
+            height: 70%;
+            background-image: url('cyanotype3.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: top right;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .about-container {
+            max-width: 550px;
+            margin: 0;
+            margin-left: 3%;
+            position: relative;
+            z-index: 2;
+            
+        }
+
+        .about-container h2 {
+            
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            color: rgb(49, 17, 2);
+            margin-bottom: 3rem;
+        }
+
+        .about-container p {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 1.3rem;
+            color: rgb(49, 17, 2);
+            line-height: 2;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        /* Contact Page */
+        .contact-page {
+            background: #f2c2d6;
+            padding: 5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-page::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -10%;
+            width: 40%;
+            height: 100%;
+            background-image: url('brocco.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom left;
+            pointer-events: none;
+            z-index: 1;
+            animation: shySlideUp 6s ease-out forwards;
+            transform: translateY(100%);
+        }
+
+        @keyframes shySlideUp {
+            0% {
+                transform: translateY(100%);
+            }
+            40% {
+                transform: translateY(50%);
+            }
+            60% {
+                transform: translateY(50%);
+            }
+            100% {
+                transform: translateY(0%);
+            }
+        }
+
+        .contact-container {
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .contact-container h2 {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            color: rgb(49, 17, 2);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .contact-intro {
+            font-size: 1.5rem;
+            color: rgb(49, 17, 2);
+            text-align: center;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .contact-links {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .contact-link {
+            color: rgb(49, 17, 2);
+            font-size: 1.5rem;
+            font-weight: 300;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .contact-link:hover {
+            transform: translateX(10px);
+        }
+
+        .contact-footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: rgb(49, 17, 2);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .contact-footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .name-container {
+                margin-left: 0;
+                margin-top: 0;
+                text-align: left;
+            }
+
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar.open {
+                width: 100%;
+            }
+
+            .page-container {
+                margin-right: 60px;
+            }
+
+            .modal-content {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .modal-image,
+            .modal-info {
+                max-width: 90%;
+            }
+
+            .about-container {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal/Lightbox -->
+    <div class="modal" id="modal">
+        <button class="close-modal" onclick="closeModal()">×</button>
+        <div class="modal-content">
+            <div class="modal-image" id="modalImage">
+                [Project Image Placeholder]
+            </div>
+            <div class="modal-info">
+                <h2 id="modalTitle">Project Title</h2>
+                <p id="modalDescription">Project description goes here. This is where you'll add details about the work, the process, and the outcome.</p>
+                <p id="modalYear" style="margin-top: 1rem; color: rgba(255, 255, 255, 0.7);">2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <nav class="nav-menu">
+            <button class="nav-link active" data-page="home">Home</button>
+            <button class="nav-link" data-page="about">About</button>
+            <button class="nav-link" data-page="contact">Contact</button>
+        </nav>
+    </div>
+
+    <!-- Page Container -->
+    <div class="page-container">
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <div class="home-page">
+                <div class="floating-orb orb-1" id="orb1"></div>
+                <div class="floating-orb orb-2" id="orb2"></div>
+                <div class="home-content">
+                    <div class="name-container">
+                        <h1>
+                            <span onclick="openModal('R', 'Project R', 'Description for project R')">R</span><span onclick="openModal('E1', 'Project E1', 'Description for project E1')">e</span><span onclick="openModal('E2', 'Project E2', 'Description for project E2')">e</span><span onclick="openModal('D', 'Project D', 'Description for project D')">d</span>
+                        </h1>
+                        <h1>
+                            <span onclick="openModal('G', 'Project G', 'Description for project G')">G</span><span onclick="openModal('U', 'Project U', 'Description for project U')">u</span><span onclick="openModal('L', 'Project L', 'Description for project L')">l</span><span onclick="openModal('D2', 'Project D2', 'Description for project D2')">d</span><span onclick="openModal('E3', 'Project E3', 'Description for project E3')">e</span><span onclick="openModal('N', 'Project N', 'Description for project N')">n</span>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div class="page" id="about">
+            <div class="about-page">
+                <div class="about-container">
+                    <h2>About Me</h2>
+                    <p>Hi! I’m Reed, a visual designer drawn to creating experimental, whimsical, and occasionally comical experiences through graphic design and hands-on, physical mediums.</p>
+                    <p>I specialize in bold, colorful, and unexpected design solutions that blur the line between art and function. While my focus is primarily digital, I work across a wide range of media, including painting, drawing, cyanotype printing, and sculpture/ceramics. From branding and web design to experimental typography, I aim to make work that’s just as enjoyable to create as it is to experience.</p>
+                    <p>When I’m not creating, I’m a Visual Arts student at Fordham University, pursuing a minor in New Media and Digital Design. Alongside my studies, I work as a teaching artist with Spark NYC, where I lead after-school programs and private lessons for students in grades K–5. Through these classes, I help young artists explore different creative mediums, build confidence, and discover their own artistic voices—an experience that meaningfully complements my own creative practice.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div class="page" id="contact">
+            <div class="contact-page">
+                <div class="contact-container">
+                    <h2>Let's Talk</h2>
+                    <p class="contact-intro">Got a project in mind? Design need? Let's create something stupendous together!</p>
+                    <div class="contact-links">
+                        <a href="mailto:reedpgulden@gmail.com" class="contact-link">reedpgulden@gmail.com</a>
+                        <a href="https://linkedin.com" target="_blank" class="contact-link">Handshake</a>
+                    </div>
+                    <div class="contact-footer">
+                        <p>Based in New York, NY</p>
+                        <p>Available for freelance or full-time opportunities</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Portfolio data - customize this with your actual projects
+        const projects = {
+            'R': { 
+                title: '"Out of this Curled"', 
+                description: 'Photoshop graphic poster',
+                year: 2025,
+                images: ['space girlies.jpg']
+            },
+            'E1': { 
+                title: 'Beer Series', 
+                description: 'Series of cyanotype prints, designed with physical collage, as well as digital elements. Exhibited in Fordham University Lipani Gallery.',
+                year: 2025,
+                images: ['beer2.jpg', 'beer3.jpg', 'beer1.jpg','beer4.jpg'],
+                isSeries: true,
+                seriesType: 'beer'
+            },
+            'E2': { 
+                title: '"Baby First Website"', 
+                description: 'Photoshop graphic poster',
+                year: 2024,
+                images: ['baby website final.jpg']
+            },
+            'D': { 
+                title: '', 
+                description: 'Mock magazine cover, Adobe Photoshop + Illustrator',
+                year: 2023,
+                images: ['best mag cover(1).jpg']
+            },
+            'G': { 
+                title: '"Cardboard Jungle"', 
+                description: 'Photoshop graphic poster',
+                year: 2025,
+                images: ['cardboard house.jpg']
+            },
+            'U': { 
+                title: '"Brothers"', 
+                description: 'Photoshop graphic poster series',
+                year: 2025,
+                images: ['brothers.jpg', 'twinz2.jpg'],
+                isSeries: true,
+                seriesType: 'brothers'
+            },
+            'L': { 
+                title: 'Cyanotype Series', 
+                description: 'Continued cyanotype print series, exhibited in Fordham University Lipani Gallery.',
+                year: 2025,
+                images: ['Gulden_Reed_1.jpg', 'Gulden_Reed_2.jpg'],
+                isSeries: true,
+                seriesType: 'brothers'
+            },
+            'D2': { 
+                title: '"Girls Trip"', 
+                description: 'Infographic series transforming complex data into engaging visual narratives.',
+                year: 2025,
+                images: ['coke girlies(1).jpg']
+            },
+            'E3': { 
+                title: '', 
+                description: 'Adobe Photoshop graphic collage',
+                year: 2025,
+                images: ['cardboard room 4.jpg']
+            },
+            'N': { 
+                title: '"Teethy Toilet"', 
+                description: 'Photoshop Graphic Poster',
+                year: 2024,
+                images: ['Teethy Toilet w words.jpg']
+            }
+        };
+
+        // Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            menuToggle.textContent = sidebar.classList.contains('open') ? '✕' : '☰';
+        });
+
+        // Navigation
+        function navigateTo(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageName).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+            
+            sidebar.classList.remove('open');
+            menuToggle.textContent = '☰';
+        }
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const pageName = e.target.getAttribute('data-page');
+                navigateTo(pageName);
+            });
+        });
+
+        // Modal Functions
+        let currentImageIndex = 0;
+        let currentProject = null;
+
+        function openModal(letter, title, description) {
+            const project = projects[letter];
+            
+            if (project) {
+                currentProject = project;
+                currentImageIndex = 0;
+                document.getElementById('modalTitle').textContent = project.title;
+                document.getElementById('modalDescription').textContent = project.description;
+                document.getElementById('modalYear').textContent = project.year;
+                
+                const modalImage = document.getElementById('modalImage');
+                if (project.images && project.images.length > 0) {
+                    if (project.isSeries) {
+                        const seriesContainer = document.createElement('div');
+                        seriesContainer.className = project.seriesType === 'beer' ? 'beer-series' : 'brothers-series';
+                        
+                        project.images.forEach((imageSrc, index) => {
+                            const img = document.createElement('img');
+                            img.src = imageSrc;
+                            img.alt = `${project.title} - Image ${index + 1}`;
+                            img.onerror = function() {
+                                console.error(`Failed to load: ${imageSrc}`);
+                                img.style.display = 'none';
+                            };
+                            seriesContainer.appendChild(img);
+                        });
+                        
+                        modalImage.innerHTML = '';
+                        modalImage.appendChild(seriesContainer);
+                    } else {
+                        const img = document.createElement('img');
+                        img.src = project.images[currentImageIndex];
+                        img.alt = project.title;
+                        img.onerror = function() {
+                            modalImage.innerHTML = `<span style="text-align: center;">Image not found.<br>Please ensure "${project.images[currentImageIndex]}" is in the correct folder.</span>`;
+                        };
+                        modalImage.innerHTML = '';
+                        modalImage.appendChild(img);
+                    }
+                } else {
+                    modalImage.innerHTML = `<span>[${project.title} Image]</span>`;
+                }
+            } else {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalDescription').textContent = description;
+                document.getElementById('modalYear').textContent = 2025;
+                document.getElementById('modalImage').innerHTML = '<span>[Project Image]</span>';
+            }
+            
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        // Mouse tracking for floating orbs
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateOrbs() {
+            const orb1 = document.getElementById('orb1');
+            const orb2 = document.getElementById('orb2');
+            
+            if (orb1) {
+                orb1.style.left = (mouseX / 20) + 'px';
+                orb1.style.top = (mouseY / 20) + 'px';
+            }
+            
+            if (orb2) {
+                orb2.style.right = (mouseX / 30) + 'px';
+                orb2.style.bottom = (mouseY / 30) + 'px';
+            }
+            
+            requestAnimationFrame(animateOrbs);
+        }
+
+        animateOrbs();
+    </script>
+</body>
+</html>
